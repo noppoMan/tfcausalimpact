@@ -359,16 +359,16 @@ def fit_model(
         )
         return samples, kernel_results
     elif method == 'vi':
-        optimizer = tf.optimizers.Adam(learning_rate=0.1)
+        optimizer = tf.optimizers.legacy.Adam(learning_rate=0.1)
         variational_steps = 200  # Hardcoded for now
         variational_posteriors = tfp.sts.build_factored_surrogate_posterior(model=model)
 
         @tf.function()
         def _run_vi():  # pragma: no cover
             tfp.vi.fit_surrogate_posterior(
-                target_log_prob_fn=model.joint_log_prob(
+                target_log_prob_fn=model.joint_distribution(
                     observed_time_series=observed_time_series
-                ),
+                ).log_prob,
                 surrogate_posterior=variational_posteriors,
                 optimizer=optimizer,
                 num_steps=variational_steps
